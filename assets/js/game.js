@@ -76,15 +76,23 @@
   function buildBoard() {
     boardEl.innerHTML = "";
 
+    // Each category is rendered as its own self-contained group (name +
+    // its 5 point buttons), so the layout can never misalign a category
+    // label from its buttons regardless of screen width — unlike a single
+    // 6-column grid, which breaks if the column count is changed responsively.
     categories.forEach(function (cat) {
+      var group = document.createElement("div");
+      group.className = "category-group";
+
       var header = document.createElement("div");
       header.className = "board-cat-header";
       header.textContent = cat.name;
-      boardEl.appendChild(header);
-    });
+      group.appendChild(header);
 
-    TIERS.forEach(function (tier) {
-      categories.forEach(function (cat) {
+      var row = document.createElement("div");
+      row.className = "category-row";
+
+      TIERS.forEach(function (tier) {
         var btn = document.createElement("button");
         btn.type = "button";
         btn.className = "board-cell";
@@ -98,8 +106,11 @@
           used ? "سؤال مستخدم" : cat.name + " — " + tier + " نقطة"
         );
         btn.addEventListener("click", onCellClick);
-        boardEl.appendChild(btn);
+        row.appendChild(btn);
       });
+
+      group.appendChild(row);
+      boardEl.appendChild(group);
     });
   }
 
