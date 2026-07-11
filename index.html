@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>لعبة المواجهة العائلية — سؤال وجواب</title>
+  <meta name="description" content="لعبة أسئلة وأجوبة عائلية لفريقين، 6 أقسام و5 مستويات نقاط، تناسب الصغار والكبار.">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="app-header">
+    <div class="container header-inner">
+      <div>
+        <h1>🏆 لعبة المواجهة العائلية</h1>
+        <p class="subtitle">سؤال وجواب لفريقين — 6 أقسام × 5 مستويات نقاط</p>
+      </div>
+      <button type="button" class="btn btn-ghost" data-reset-game>إعادة اللعبة 🔄</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="scoreboard" aria-label="لوحة النقاط">
+      <div class="team-card team-card--1">
+        <label class="team-name-label" for="team1-name">الفريق الأول</label>
+        <input id="team1-name" class="team-name-input" type="text" value="الفريق الأزرق" maxlength="20" data-team-name="0">
+        <div class="team-score" data-team-score="0">0</div>
+      </div>
+
+      <div class="turn-indicator" data-turn-indicator>
+        <span>دور:</span>
+        <strong data-turn-team-name>الفريق الأزرق</strong>
+      </div>
+
+      <div class="team-card team-card--2">
+        <label class="team-name-label" for="team2-name">الفريق الثاني</label>
+        <input id="team2-name" class="team-name-input" type="text" value="الفريق الأحمر" maxlength="20" data-team-name="1">
+        <div class="team-score" data-team-score="1">0</div>
+      </div>
+    </section>
+
+    <section aria-label="لوحة الأسئلة">
+      <div class="board" data-board>
+        <!-- filled by game.js -->
+      </div>
+    </section>
+
+    <p class="hint">اضغط على أي خانة رقم لفتح سؤال عشوائي من ذلك القسم والمستوى. كل خانة تُستخدم مرة واحدة فقط.</p>
+  </main>
+
+  <div class="modal-backdrop" data-modal-backdrop hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-category" data-modal>
+      <div class="modal-header">
+        <span class="modal-category" id="modal-category" data-modal-category>القسم</span>
+        <span class="modal-points" data-modal-points>100</span>
+      </div>
+      <p class="modal-question" data-modal-question>نص السؤال</p>
+      <div class="modal-answer" data-modal-answer hidden>
+        <span class="modal-answer-label">الإجابة:</span>
+        <span data-modal-answer-text></span>
+      </div>
+      <button type="button" class="btn btn-outline" data-reveal-answer>إظهار الإجابة 👁️</button>
+      <button type="button" class="btn btn-link" data-cancel-cell>إلغاء (فُتحت بالخطأ) ↩️</button>
+
+      <div class="modal-actions" data-modal-actions hidden>
+        <p class="modal-actions-title">من جاوب صح؟</p>
+        <div class="modal-actions-buttons">
+          <button type="button" class="btn btn-team btn-team--1" data-award="0"></button>
+          <button type="button" class="btn btn-team btn-team--2" data-award="1"></button>
+          <button type="button" class="btn btn-ghost" data-award="none">لا أحد ✋</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" data-endgame-backdrop hidden>
+    <div class="modal modal--endgame" role="dialog" aria-modal="true" aria-labelledby="endgame-title">
+      <h2 id="endgame-title" data-endgame-title>🎉 انتهت اللعبة!</h2>
+      <p data-endgame-result></p>
+      <button type="button" class="btn btn-primary" data-endgame-close>حسناً</button>
+    </div>
+  </div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/game.js"></script>
+</body>
+</html>
