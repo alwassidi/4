@@ -1,8 +1,8 @@
 (function () {
   "use strict";
 
-  var TIERS = [100, 200, 300, 400, 500];
-  var STORAGE_KEY = "family-trivia-state-v1";
+  var TIERS = [200, 400, 600, 800, 1000];
+  var STORAGE_KEY = "family-trivia-state-v2";
   var categories = window.TRIVIA_DATA.categories;
 
   var boardEl = document.querySelector("[data-board]");
