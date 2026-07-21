@@ -424,6 +424,105 @@ button {
   margin-block-end: 1rem;
 }
 
+/* ---------- Team helpers (lifelines) ---------- */
+.helpers-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-block-end: 1rem;
+}
+
+.helpers-team {
+  border-radius: var(--radius-md);
+  padding: 0.5rem;
+  border: 2px solid transparent;
+}
+
+.helpers-team--1 {
+  background: #eff4ff;
+  border-color: var(--color-team1);
+}
+
+.helpers-team--2 {
+  background: #fef1f1;
+  border-color: var(--color-team2);
+}
+
+.helpers-team-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  margin-block-end: 0.35rem;
+  text-align: center;
+}
+
+.helpers-team--1 .helpers-team-label {
+  color: var(--color-team1-dark);
+}
+
+.helpers-team--2 .helpers-team-label {
+  color: var(--color-team2-dark);
+}
+
+.helpers-buttons {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.helper-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-cell-used);
+  border-radius: var(--radius-sm, 8px);
+  padding: 0.35rem 0.2rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform var(--transition), opacity var(--transition);
+}
+
+.helper-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.helper-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.helper-btn .helper-count {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--color-muted);
+}
+
+.hint-box {
+  background: #fff7e6;
+  border: 2px dashed var(--color-accent);
+  border-radius: var(--radius-md);
+  padding: 0.6rem 0.9rem;
+  font-weight: 700;
+  color: #7a5200;
+  margin-block-end: 1rem;
+}
+
+.hint-box[hidden] {
+  display: none;
+}
+
+.double-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 0.15rem 0.5rem;
+  margin-inline-start: 0.4rem;
+  color: #fff;
+}
+
 @media (min-width: 1100px) {
   .modal {
     max-width: 720px;

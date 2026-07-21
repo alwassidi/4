@@ -2,8 +2,14 @@
   "use strict";
 
   var TIERS = [200, 400, 600, 800, 1000];
-  var STORAGE_KEY = "family-trivia-state-v2";
+  var STORAGE_KEY = "family-trivia-state-v3";
   var categories = window.TRIVIA_DATA.categories;
+
+  var HELPER_TYPES = [
+    { key: "changeQuestion", icon: "🔄", label: "تغيير السؤال" },
+    { key: "hint", icon: "💡", label: "تلميح" },
+    { key: "double", icon: "٢×", label: "مضاعفة النقاط" }
+  ];
 
   var boardEl = document.querySelector("[data-board]");
   var modalBackdrop = document.querySelector("[data-modal-backdrop]");
@@ -23,16 +29,29 @@
   var teamNameInputs = document.querySelectorAll("[data-team-name]");
   var teamScoreEls = document.querySelectorAll("[data-team-score]");
   var awardButtons = document.querySelectorAll("[data-award]");
+  var helpersRow = document.querySelector("[data-helpers-row]");
+  var hintBox = document.querySelector("[data-hint-box]");
 
   var state = loadState();
   var openCell = null; // { catId, tier }
+  var currentPool = null; // the 10-question pool for the open cell
+  var currentQuestion = null; // the specific question currently shown
+  var doubleActive = { 0: false, 1: false }; // per-team double-points flag for the open question
+
+  function defaultHelpers() {
+    return [
+      { changeQuestion: 2, hint: 2, double: 2 },
+      { changeQuestion: 2, hint: 2, double: 2 }
+    ];
+  }
 
   function defaultState() {
     return {
       teamNames: ["الفريق الأزرق", "الفريق الأحمر"],
       scores: [0, 0],
       turn: 0,
-      used: {} // key "catId-tier" -> true
+      used: {}, // key "catId-tier" -> true
+      helpers: defaultHelpers() // per-team lifeline counters, 2 uses each
     };
   }
 
@@ -41,7 +60,10 @@
       var raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         var parsed = JSON.parse(raw);
-        if (parsed && parsed.scores && parsed.used) return parsed;
+        if (parsed && parsed.scores && parsed.used) {
+          if (!parsed.helpers) parsed.helpers = defaultHelpers();
+          return parsed;
+        }
       }
     } catch (e) {
       /* ignore corrupt/unavailable storage */
@@ -120,17 +142,21 @@
     var tier = Number(btn.getAttribute("data-tier"));
     var cat = categories.filter(function (c) { return c.id === catId; })[0];
     var pool = cat.tiers[tier];
-    var question = pool[Math.floor(Math.random() * pool.length)];
 
     openCell = { catId: catId, tier: tier };
+    currentPool = pool;
+    currentQuestion = pool[Math.floor(Math.random() * pool.length)];
+    doubleActive = { 0: false, 1: false };
 
     modalCategory.textContent = cat.name;
     modalPoints.textContent = tier + " نقطة";
-    modalQuestion.textContent = question.q;
-    modalAnswerText.textContent = question.a;
+    modalQuestion.textContent = currentQuestion.q;
+    modalAnswerText.textContent = currentQuestion.a;
     modalAnswer.hidden = true;
     modalActions.hidden = true;
     revealBtn.hidden = false;
+    hintBox.hidden = true;
+    hintBox.textContent = "";
 
     awardButtons.forEach(function (b) {
       var i = b.getAttribute("data-award");
@@ -139,12 +165,92 @@
       }
     });
 
+    renderHelpers();
     modalBackdrop.hidden = false;
   }
 
   function closeModal() {
     modalBackdrop.hidden = true;
     openCell = null;
+    currentPool = null;
+    currentQuestion = null;
+    doubleActive = { 0: false, 1: false };
+  }
+
+  function buildHint(answer) {
+    var trimmed = answer.trim();
+    var words = trimmed.split(/\s+/);
+    var firstLetter = trimmed.charAt(0);
+    var wordLabel = words.length === 1 ? "كلمة واحدة" : words.length + " كلمات";
+    return 'الإجابة تبدأ بحرف "' + firstLetter + '" وتتكوّن من ' + wordLabel;
+  }
+
+  function useHelper(teamIndex, key) {
+    if (!openCell || !currentQuestion) return;
+    if (state.helpers[teamIndex][key] <= 0) return;
+    if (key === "double" && doubleActive[teamIndex]) return;
+
+    state.helpers[teamIndex][key] -= 1;
+
+    if (key === "changeQuestion") {
+      var alternatives = currentPool.filter(function (q) {
+        return q.q !== currentQuestion.q;
+      });
+      if (alternatives.length > 0) {
+        currentQuestion = alternatives[Math.floor(Math.random() * alternatives.length)];
+        modalQuestion.textContent = currentQuestion.q;
+        modalAnswerText.textContent = currentQuestion.a;
+        hintBox.hidden = true;
+        hintBox.textContent = "";
+        modalAnswer.hidden = true;
+        modalActions.hidden = true;
+        revealBtn.hidden = false;
+      }
+    } else if (key === "hint") {
+      hintBox.textContent = "💡 " + buildHint(currentQuestion.a);
+      hintBox.hidden = false;
+    } else if (key === "double") {
+      doubleActive[teamIndex] = true;
+    }
+
+    saveState();
+    renderHelpers();
+  }
+
+  function renderHelpers() {
+    helpersRow.innerHTML = "";
+
+    [0, 1].forEach(function (teamIndex) {
+      var teamWrap = document.createElement("div");
+      teamWrap.className = "helpers-team helpers-team--" + (teamIndex + 1);
+
+      var label = document.createElement("span");
+      label.className = "helpers-team-label";
+      label.textContent =
+        state.teamNames[teamIndex] + (doubleActive[teamIndex] ? " (مضاعفة مفعّلة)" : "");
+      teamWrap.appendChild(label);
+
+      var btnsWrap = document.createElement("div");
+      btnsWrap.className = "helpers-buttons";
+
+      HELPER_TYPES.forEach(function (helper) {
+        var remaining = state.helpers[teamIndex][helper.key];
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "helper-btn";
+        btn.title = helper.label;
+        btn.setAttribute("aria-label", helper.label + " — " + state.teamNames[teamIndex]);
+        btn.disabled = remaining <= 0 || (helper.key === "double" && doubleActive[teamIndex]);
+        btn.innerHTML = helper.icon + '<span class="helper-count">' + remaining + "×</span>";
+        btn.addEventListener("click", function () {
+          useHelper(teamIndex, helper.key);
+        });
+        btnsWrap.appendChild(btn);
+      });
+
+      teamWrap.appendChild(btnsWrap);
+      helpersRow.appendChild(teamWrap);
+    });
   }
 
   cancelBtn.addEventListener("click", closeModal);
@@ -161,7 +267,8 @@
       var award = btn.getAttribute("data-award");
       if (award === "0" || award === "1") {
         var i = Number(award);
-        state.scores[i] += openCell.tier;
+        var points = doubleActive[i] ? openCell.tier * 2 : openCell.tier;
+        state.scores[i] += points;
       }
       state.used[cellKey(openCell.catId, openCell.tier)] = true;
       state.turn = state.turn === 0 ? 1 : 0;
