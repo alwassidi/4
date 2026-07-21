@@ -114,6 +114,18 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.35);
 }
 
+/* For use on light/white backgrounds (e.g. inside .modal) — .btn-ghost's
+   white-on-translucent-white styling is invisible there. */
+.btn-neutral {
+  background: var(--color-cell);
+  color: var(--color-ink);
+  border: 2px solid var(--color-cell-used);
+}
+
+.btn-neutral:hover {
+  background: #e2e5fb;
+}
+
 .btn-outline {
   background: transparent;
   border: 2px solid var(--color-ink);
