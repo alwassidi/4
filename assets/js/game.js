@@ -2,7 +2,7 @@
   "use strict";
 
   var TIERS = [200, 400, 600, 800, 1000];
-  var STORAGE_KEY = "family-trivia-state-v3";
+  var STORAGE_KEY = "family-trivia-state-v4";
   var categories = window.TRIVIA_DATA.categories;
 
   var HELPER_TYPES = [
