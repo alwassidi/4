@@ -177,12 +177,36 @@
     doubleActive = { 0: false, 1: false };
   }
 
-  function buildHint(answer) {
-    var trimmed = answer.trim();
-    var words = trimmed.split(/\s+/);
-    var firstLetter = trimmed.charAt(0);
-    var wordLabel = words.length === 1 ? "كلمة واحدة" : words.length + " كلمات";
-    return 'الإجابة تبدأ بحرف "' + firstLetter + '" وتتكوّن من ' + wordLabel;
+  var OPTION_LETTERS = ["أ", "ب", "ج"];
+
+  function buildHintOptions(catId, correctAnswer) {
+    var cat = categories.filter(function (c) {
+      return c.id === catId;
+    })[0];
+
+    var otherAnswers = [];
+    TIERS.forEach(function (tier) {
+      cat.tiers[tier].forEach(function (item) {
+        if (item.a !== correctAnswer && otherAnswers.indexOf(item.a) === -1) {
+          otherAnswers.push(item.a);
+        }
+      });
+    });
+
+    var decoys = [];
+    while (decoys.length < 2 && otherAnswers.length > 0) {
+      var idx = Math.floor(Math.random() * otherAnswers.length);
+      decoys.push(otherAnswers.splice(idx, 1)[0]);
+    }
+
+    var options = decoys.concat([correctAnswer]);
+    for (var i = options.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = options[i];
+      options[i] = options[j];
+      options[j] = tmp;
+    }
+    return options;
   }
 
   function useHelper(teamIndex, key) {
@@ -207,7 +231,12 @@
         revealBtn.hidden = false;
       }
     } else if (key === "hint") {
-      hintBox.textContent = "💡 " + buildHint(currentQuestion.a);
+      var options = buildHintOptions(openCell.catId, currentQuestion.a);
+      var lines = options.map(function (opt, idx) {
+        return OPTION_LETTERS[idx] + ") " + opt;
+      });
+      hintBox.innerHTML =
+        "💡 اختر الإجابة الصحيحة:<br>" + lines.join("<br>");
       hintBox.hidden = false;
     } else if (key === "double") {
       doubleActive[teamIndex] = true;
